@@ -1,4 +1,8 @@
-# %% modules and functions
+# %% 
+#####################################################
+## Six-node simulation in the paper:
+## A Note on Ising Network Analysis with Missing Data
+#####################################################
 
 # Import necessary libraries
 import os
@@ -14,12 +18,8 @@ from depend_funcs import *
 # Set the seed for reproducibility
 np.random.seed(1234)
 
-# Define sample size, number of variables, number of latent variables
+# Define sample size, number of variables
 J = 6
-K = 1
-
-# Initialize a simple structure for the loading matrix
-A = np.zeros((J, K))
 
 # Set a sparse network structure of S
 S = np.zeros((J, J))
@@ -60,7 +60,7 @@ for i, n in enumerate(N):
     print("N: ", n, "reps: ", reps)
     
     # Generate data from the true model
-    data_y, data_theta, theta0_chain = generate_y_theta(A, S, n, mcmc_len=1000, silent=True)
+    data_y, data_theta, theta0_chain = generate_y_theta(np.zeros((J, 1)), S, n, mcmc_len=1000, silent=True)
     
     # Apply MAR to mask some elements in data_y
     data_y_masked = MAR_mask(data_y, P_RATE, Q_RATE)

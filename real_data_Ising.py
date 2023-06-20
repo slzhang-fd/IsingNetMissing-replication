@@ -31,8 +31,9 @@ TAU_1_S_SET = 1
 MCMC_LEN_SET = 10000
 K0_SET = 10
 
-# Set random seed for reproducibility
-reps = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+# Set repetitions number from environment variable
+# reps = int(os.getenv('SLURM_ARRAY_TASK_ID'))
+reps = 1
 np.random.seed(reps)
 
 # Generate initial S0 matrix

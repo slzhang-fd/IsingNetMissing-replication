@@ -1,5 +1,10 @@
-# %% modules and functions
+# %% 
+#####################################################
+## Fifteen-node simulation in the paper:
+## A Note on Ising Network Analysis with Missing Data
+#####################################################
 
+# Import necessary libraries
 import os
 import pickle
 
@@ -7,20 +12,16 @@ import numpy as np
 import numpy.random as npr
 import pandas as pd
 
-## loading functions from depend_funcs.py
+## Import functions from depend_funcs.py
 from depend_funcs import *
 
-## set random seed
+## Set the seed for reproducibility
 np.random.seed(1)
 
-## sample size, number of variables, number of latent variables
+## Define sample size, number of variables
 J = 15
-K = 1
 
-## use a simple structure for the loading matrix
-A = np.zeros((J, K))
-
-## set a sparse network structure of S
+## Set a sparse network structure of S
 S = np.zeros((J, J))
 S_sparsity = 0.3
 
@@ -59,7 +60,7 @@ for i, n in enumerate(N):
     
     ## generate data from the true model
     # Generate data from the true model with the given parameters
-    data_y, data_theta, theta0_chain = generate_y_theta(A, S, n, mcmc_len=1000, silent=True)
+    data_y, data_theta, theta0_chain = generate_y_theta(np.zeros((J, 1)), S, n, mcmc_len=1000, silent=True)
     
     # Randomly mask half of the data
     data_y_masked = randomly_mask(data_y, 0.5)
