@@ -2,7 +2,7 @@
 ## Description
 
 The repository contains code associated with the following article (i.e., the code supporting the numerical findings)  and describes how to reproduce the findings.
-> Zhang, S. and Chen, Y. (2023). A Note on Ising Network Analysis with Missing Data
+> Zhang, S. and Chen, Y. (2023). A Note on Ising Network Analysis with Missing Data.
 
 ## Files
 
