@@ -1,6 +1,10 @@
-## NSDUH 2014 data
+# %% 
+###########################################################################
+## Analyse the NESARC dataset utilizing the method proposed in the paper:
+## A Note on Ising Network Analysis with Missing Data
+###########################################################################
 
-# %% import data from tsv file
+# Import necessary libraries
 import pandas as pd
 import numpy as np
 import numpy.random as npr
