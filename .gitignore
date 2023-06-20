@@ -1,0 +1,17 @@
+# Ignore everything
+*
+
+# Allow .py and .R files
+!*.py
+!*.R
+!.gitignore
+!*.md
+
+# Allow data
+!*.pkl
+
+# Allow running script
+!*.sh
+
+# Allow directories
+!*/
