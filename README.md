@@ -18,6 +18,9 @@ The following files are provided:
 
 The provided code scripts are written in Python. Users should ensure they have an appropriate Python environment set up to run the scripts.
 
+### Run the code on Colab
+[![Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1tgaES1zQ-cmEcvwT_Zqx9rdJAewL_5RB?usp=sharing)
+
 ### Licensing Information
 
 GPL v3.0
