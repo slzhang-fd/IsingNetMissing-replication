@@ -5,7 +5,6 @@
 #####################################################
 
 # Import necessary libraries
-# import os
 import pickle
 
 import numpy as np
@@ -13,10 +12,15 @@ import numpy.random as npr
 import pandas as pd
 
 # Import functions from depend_funcs.py
-from depend_funcs import MAR_mask, generate_y_theta, mis_ising
+from depend_funcs import (  # noqa: F401
+    generate_y_theta,
+    mis_ising,
+    randomly_mask,
+    screening_mask,
+)
 
 # Set the seed for reproducibility
-np.random.seed(1234)
+# np.random.seed(123)
 
 # Define sample size, number of variables
 J = 6
@@ -29,7 +33,7 @@ S_sparsity = 0.5
 indices = np.tril_indices(J, -1)
 S[indices] = (
     (npr.uniform(0, 1, size=int(J * (J - 1) / 2)) < S_sparsity)
-    * npr.uniform(0.4, 1, size=int(J * (J - 1) / 2))
+    * npr.uniform(0.5, 1.5, size=int(J * (J - 1) / 2))
     * npr.choice([-1, 1], size=int(J * (J - 1) / 2))
 )
 
@@ -43,11 +47,9 @@ np.fill_diagonal(S, 0)
 # Set hyper-parameters
 TAU_1_S_SET = 1
 MCMC_LEN_SET = 5000
-BURN_IN_SET = 1000
+BURN_IN_SET = 2000
 K0_SET = 10
-N = [1000, 2000, 4000, 8000]
-P_RATE = [0.3, 0.8, 0.3, 0.7, 0.2]
-Q_RATE = [0.8, 0.5, 0.7, 0.4, 0.9]
+N = [4000]
 
 # Initialize results lists
 res_all_proposed = []
@@ -69,8 +71,10 @@ for i, n in enumerate(N):
     )
 
     # Apply MAR to mask some elements in data_y
-    data_y_masked = MAR_mask(data_y, P_RATE, Q_RATE)
-    data_y_complete = data_y_masked[~np.isnan(data_y_masked[:, 0]), :]
+    # data_y_masked = screening_mask(data_y)
+    # data_y_complete = data_y_masked[~np.isnan(data_y_masked[:, 0]), :]
+    data_y_masked = randomly_mask(data_y, 0.1)
+    data_y_complete = data_y_masked[~np.isnan(data_y_masked).any(1), :]
 
     # Initialize S0
     S0 = npr.uniform(-0.1, 0.1, (J, J))
@@ -78,45 +82,54 @@ for i, n in enumerate(N):
 
     # Execute and store the results of the proposed method
     alpha_res = mis_ising(
-        data_y_masked, S0.copy(), TAU_1_S_SET, k0=K0_SET, mcmc_len=MCMC_LEN_SET
-    )
-    res_all_proposed.append(
-        pd.DataFrame(
-            {
-                "alpha_res": np.mean(alpha_res[int(BURN_IN_SET / K0_SET) :], axis=0),
-                "S": S[np.triu_indices(J)],
-            }
-        )
+        data_y_masked.copy(),
+        S0.copy(),
+        TAU_1_S_SET,
+        k0=K0_SET,
+        mcmc_len=MCMC_LEN_SET,
+        silent=False,
     )
     print("proposed finished,")
 
-    # Execute and store the results of the impute complete method
-    alpha_res = mis_ising(
-        data_y_masked, S0.copy(), TAU_1_S_SET, k0=K0_SET, mcmc_len=MCMC_LEN_SET
+    ## estimate S using full data
+    data_test = data_y.copy().astype(float)
+    # data_test[0, 0] = np.nan
+    alpha_res_com = mis_ising(
+        data_test.copy(),
+        S0.copy(),
+        TAU_1_S_SET,
+        k0=K0_SET,
+        mcmc_len=MCMC_LEN_SET,
+        silent=False,
     )
-    res_all_impute_complete.append(
-        pd.DataFrame(
-            {
-                "alpha_res": np.mean(alpha_res[int(BURN_IN_SET / K0_SET) :], axis=0),
-                "S": S[np.triu_indices(J)],
-            }
-        )
+    print("complete all finished,")
+    ## estimate S using complete-case data
+    alpha_res_com1 = mis_ising(
+        data_y_complete.copy(),
+        S0.copy(),
+        TAU_1_S_SET,
+        k0=K0_SET,
+        mcmc_len=MCMC_LEN_SET,
+        silent=False,
     )
-    print("impute complete finished,")
+    print("complete finished,")
 
-    # Execute and store the results of the complete analysis method
-    alpha_res = mis_ising(
-        data_y_complete, S0.copy(), TAU_1_S_SET, k0=K0_SET, mcmc_len=MCMC_LEN_SET
-    )
-    res_all_complete_analysis.append(
-        pd.DataFrame(
-            {
-                "alpha_res": np.mean(alpha_res[int(BURN_IN_SET / K0_SET) :], axis=0),
-                "S": S[np.triu_indices(J)],
-            }
-        )
-    )
-    print("complete analysis finished.")
+
+# %% compare the results
+pd.DataFrame(
+    {
+        "estimated_mis": np.mean(alpha_res[int(BURN_IN_SET / K0_SET) :], axis=0).round(
+            2
+        ),
+        "estimated_complete_all": np.mean(
+            alpha_res_com[int(BURN_IN_SET / K0_SET) :], axis=0
+        ).round(2),
+        "estimated_complete": np.mean(
+            alpha_res_com1[int(BURN_IN_SET / K0_SET) :], axis=0
+        ).round(2),
+        "true": S[np.triu_indices(J)].round(2),
+    }
+)
 
 # %%
 # Save results using pickle
